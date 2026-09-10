@@ -1,2 +1,4 @@
-# cs200-lab2-group-15
-Codejutsu!
+## Lab 2 Practice
+Team: Group 3
+Members: Simeon, Daniel, Cameron, Jackson, Teal'c
+This repository is practice for using Git, GitHub, and VS Code.
