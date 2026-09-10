@@ -1,4 +1,4 @@
 ## Lab 2 Practice
 Team: Group 3
 Members: Simeon, Daniel, Cameron, Jackson, Teal'c
-This repository is practice for using Git, GitHub, and VS Code.
+This repository is practice for using Git, GitHub, and VS Code
