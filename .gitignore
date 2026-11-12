@@ -1,0 +1,7 @@
+# Local database credentials (never commit)
+db.properties
+.env
+
+# Compiled class files
+out/
+*.class
