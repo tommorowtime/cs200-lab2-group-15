@@ -14,7 +14,7 @@ public class ChocAnApp {
             System.out.println("==================================");
 
             System.out.print("Username: ");
-            System.out.println("Type 'exit' to shut down.");
+            System.out.println("\n Type 'exit' to shut down.");
             String username = input.nextLine().trim();
 
             if (username.equalsIgnoreCase("exit")) {
