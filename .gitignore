@@ -1,5 +1,6 @@
 # Local database credentials (never commit)
 db.properties
+src/db.properties
 .env
 
 # Compiled class files
