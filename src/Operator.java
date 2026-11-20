@@ -10,6 +10,89 @@ public class Operator {
     private static final List<Member> localMembers = new ArrayList<>();
     private static final List<Provider> localProviders = new ArrayList<>();
 
+    static {
+        // Pre-populate sample records for testing in Local Mode
+        localMembers.add(new Member("123456789", "Alice Smith", "100 Choc St", "Portland", "OR", "97201", false));
+        localMembers.add(new Member("987654321", "Bob Johnson", "200 Cocoa Ave", "Seattle", "WA", "98101", true));
+        localMembers.add(new Member("555666777", "Charlie Brown", "300 Truffle Rd", "San Jose", "CA", "95112", false));
+
+        localProviders.add(new Provider("111222333", "Dr. Sweet Tooth", "500 Dental Way", "Portland", "OR", "97205"));
+        localProviders.add(new Provider("444555666", "Choc Care Clinic", "600 Health Blvd", "Seattle", "WA", "98104"));
+    }
+
+    // Programmatic CRUD helpers (used by both GUI and Console)
+    public static boolean addMember(Member member) {
+        if (useDatabase) {
+            return ChocAN_DB.addMember(member);
+        } else {
+            localMembers.add(member);
+            return true;
+        }
+    }
+
+    public static boolean updateMember(Member member) {
+        if (useDatabase) {
+            return ChocAN_DB.updateMember(member);
+        } else {
+            for (int i = 0; i < localMembers.size(); i++) {
+                if (localMembers.get(i).getMemberId().equals(member.getMemberId())) {
+                    localMembers.set(i, member);
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
+    public static boolean deleteMember(String memberId) {
+        if (useDatabase) {
+            return ChocAN_DB.deleteMember(memberId);
+        } else {
+            Member m = findMemberById(memberId);
+            if (m != null) {
+                localMembers.remove(m);
+                return true;
+            }
+            return false;
+        }
+    }
+
+    public static boolean addProvider(Provider provider) {
+        if (useDatabase) {
+            return ChocAN_DB.addProvider(provider);
+        } else {
+            localProviders.add(provider);
+            return true;
+        }
+    }
+
+    public static boolean updateProvider(Provider provider) {
+        if (useDatabase) {
+            return ChocAN_DB.updateProvider(provider);
+        } else {
+            for (int i = 0; i < localProviders.size(); i++) {
+                if (localProviders.get(i).getProviderId().equals(provider.getProviderId())) {
+                    localProviders.set(i, provider);
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
+    public static boolean deleteProvider(String providerId) {
+        if (useDatabase) {
+            return ChocAN_DB.deleteProvider(providerId);
+        } else {
+            Provider p = findProviderById(providerId);
+            if (p != null) {
+                localProviders.remove(p);
+                return true;
+            }
+            return false;
+        }
+    }
+
     public static void setUseDatabase(boolean useDb) {
         useDatabase = useDb;
         if (useDatabase) {

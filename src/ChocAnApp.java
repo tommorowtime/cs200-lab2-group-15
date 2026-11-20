@@ -16,7 +16,7 @@ public class ChocAnApp {
             System.out.println("   [" + Operator.getModeName() + "]");
             System.out.println("==================================");
 
-            System.out.println(" Type 'mode' to switch mode, or 'exit' to shut down.");
+            System.out.println(" Type 'mode' to switch mode, 'gui' to open graphical UI, or 'exit' to shut down.");
             System.out.print("\nUsername: ");
             String username = input.nextLine().trim();
 
@@ -28,6 +28,12 @@ public class ChocAnApp {
 
             if (username.equalsIgnoreCase("mode")) {
                 selectMode(input);
+                continue;
+            }
+
+            if (username.equalsIgnoreCase("gui")) {
+                System.out.println("Launching Graphical User Interface (GUI)...");
+                ChocAnGUI.main(new String[0]);
                 continue;
             }
 
