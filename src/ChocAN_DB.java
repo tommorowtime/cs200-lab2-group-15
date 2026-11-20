@@ -10,6 +10,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+/**
+ * Cloud Database Persistence Layer (Neon PostgreSQL) for ChocAn Data Center.
+ * Manages Member, Provider, Operator, and ServiceRecord tables in PostgreSQL.
+ *
+ * @author Simeon (Team 15 - Backend & Database)
+ */
 public class ChocAN_DB {
     private static String dbUrl;
     private static boolean initialized = false;
@@ -57,9 +63,9 @@ public class ChocAN_DB {
         String createMemberTable = """
                 CREATE TABLE IF NOT EXISTS public."Member" (
                     "MemberId" VARCHAR(9) PRIMARY KEY,
-                    "Name" TEXT NOT NULL,
-                    "Address" TEXT NOT NULL DEFAULT '',
-                    "City" TEXT NOT NULL DEFAULT '',
+                    "Name" VARCHAR(25) NOT NULL,
+                    "Address" VARCHAR(25) NOT NULL DEFAULT '',
+                    "City" VARCHAR(14) NOT NULL DEFAULT '',
                     "State" VARCHAR(2) NOT NULL DEFAULT '',
                     "Zip" VARCHAR(10) NOT NULL DEFAULT '',
                     "Suspended" BOOLEAN NOT NULL DEFAULT FALSE
@@ -69,11 +75,23 @@ public class ChocAN_DB {
         String createProviderTable = """
                 CREATE TABLE IF NOT EXISTS public."Provider" (
                     "ProviderId" VARCHAR(9) PRIMARY KEY,
-                    "Name" TEXT NOT NULL,
-                    "Address" TEXT NOT NULL DEFAULT '',
-                    "City" TEXT NOT NULL DEFAULT '',
+                    "Name" VARCHAR(25) NOT NULL,
+                    "Address" VARCHAR(25) NOT NULL DEFAULT '',
+                    "City" VARCHAR(14) NOT NULL DEFAULT '',
                     "State" VARCHAR(2) NOT NULL DEFAULT '',
                     "Zip" VARCHAR(10) NOT NULL DEFAULT ''
+                );
+                """;
+
+        String createServiceRecordTable = """
+                CREATE TABLE IF NOT EXISTS public."ServiceRecord" (
+                    "Id" SERIAL PRIMARY KEY,
+                    "CurrentDateTime" VARCHAR(19) NOT NULL,
+                    "ServiceDate" VARCHAR(10) NOT NULL,
+                    "ProviderId" VARCHAR(9) NOT NULL,
+                    "MemberId" VARCHAR(9) NOT NULL,
+                    "ServiceCode" VARCHAR(6) NOT NULL,
+                    "Comments" VARCHAR(100) NOT NULL DEFAULT ''
                 );
                 """;
 
@@ -81,6 +99,7 @@ public class ChocAN_DB {
              Statement stmt = conn.createStatement()) {
             stmt.execute(createMemberTable);
             stmt.execute(createProviderTable);
+            stmt.execute(createServiceRecordTable);
             initialized = true;
             return true;
         } catch (Exception e) {
@@ -113,12 +132,10 @@ public class ChocAN_DB {
 
         try (Connection conn = getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
             pstmt.setString(1, name);
             pstmt.setString(2, secret);
             pstmt.executeUpdate();
             System.out.println("Added operator: " + name);
-
         } catch (Exception e) {
             System.err.println("Error adding operator: " + e.getMessage());
         }
@@ -131,12 +148,10 @@ public class ChocAN_DB {
         try (Connection conn = getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
-
             System.out.println("Current Operators:");
             while (rs.next()) {
                 System.out.println("- [" + rs.getInt("id") + "] " + rs.getString("OperatorName"));
             }
-
         } catch (Exception e) {
             System.err.println("Error querying operators: " + e.getMessage());
         }
@@ -370,6 +385,57 @@ public class ChocAN_DB {
             System.err.println("Error deleting provider from DB: " + e.getMessage());
             return false;
         }
+    }
+
+    // ==================== SERVICE RECORD CRUD ====================
+
+    public static boolean addServiceRecord(ServiceRecord record) {
+        initializeDatabase();
+        String sql = """
+                INSERT INTO public."ServiceRecord"
+                ("CurrentDateTime", "ServiceDate", "ProviderId", "MemberId", "ServiceCode", "Comments")
+                VALUES (?, ?, ?, ?, ?, ?)
+                """;
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, record.getCurrentDateTime());
+            pstmt.setString(2, record.getServiceDate());
+            pstmt.setString(3, record.getProviderId());
+            pstmt.setString(4, record.getMemberId());
+            pstmt.setString(5, record.getServiceCode());
+            pstmt.setString(6, record.getComments());
+            return pstmt.executeUpdate() > 0;
+        } catch (Exception e) {
+            System.err.println("Error adding service record to DB: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public static List<ServiceRecord> getAllServiceRecords() {
+        initializeDatabase();
+        List<ServiceRecord> list = new ArrayList<>();
+        String sql = """
+                SELECT "CurrentDateTime", "ServiceDate", "ProviderId", "MemberId", "ServiceCode", "Comments"
+                FROM public."ServiceRecord"
+                ORDER BY "Id" ASC
+                """;
+        try (Connection conn = getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                list.add(new ServiceRecord(
+                        rs.getString("CurrentDateTime"),
+                        rs.getString("ServiceDate"),
+                        rs.getString("ProviderId"),
+                        rs.getString("MemberId"),
+                        rs.getString("ServiceCode"),
+                        rs.getString("Comments")
+                ));
+            }
+        } catch (Exception e) {
+            System.err.println("Error listing service records from DB: " + e.getMessage());
+        }
+        return list;
     }
 
     public static void main(String[] args) {
